@@ -3,94 +3,130 @@
 #include <stdio.h>
 
 /**
- * merge - merges two sorted sub-arrays
- * @array: the original array
- * @size: size of the array
- * @left: pointer to the left sub-array
- * @left_size: size of the left sub-array
- * @right: pointer to the right sub-array
- * @right_size: size of the right sub-array
- **/
-void merge(int *array, size_t size, int *left, size_t left_size,
-int *right, size_t right_size)
+ * print_left_right - print left and right partitions
+ * @array: array
+ * @size: size of second array
+ * @first: initial position
+ * @mid: middle position
+ */
+void print_left_right(int *array, int size, int first, int mid)
 {
-	size_t i = 0, j = 0, k = 0;
-	int *tmp = malloc(size * sizeof(int));
+	int k;
 
-	if (!tmp)
-		return;
+	printf("Merging...\n");
+	printf("[left]: ");
+	k = first;
+	while (k < mid)
+	{
+		if (k != mid - 1)
+			printf("%d, ", array[k]);
+		else
+			printf("%d\n", array[k]);
+		k++;
+	}
 
-	printf("Merging...\n[left]: ");
-	print_array(left, left_size);
 	printf("[right]: ");
-	print_array(right, right_size);
+	k = mid;
+	while (k < size)
+	{
+		if (k < size - 1)
+			printf("%d, ", array[k]);
+		else
+			printf("%d\n", array[k]);
+		k++;
+	}
+}
 
-	while (i < left_size && j < right_size)
-		tmp[k++] = left[i] < right[j] ? left[i++] : right[j++];
+/**
+ * merge - merge the values in the position of array
+ * @array: first array
+ * @size: size of second array
+ * @cpy: copy of array
+ * @first: initial position
+ * @mid: middle position
+ * first one of the second array
+ */
+void merge(int *array, int size, int first, int mid, int *cpy)
+{
+	int i, j, k;
 
-	while (i < left_size)
-		tmp[k++] = left[i++];
+	print_left_right(array, size, first, mid);
 
-	while (j < right_size)
-		tmp[k++] = right[j++];
-
-	for (i = 0; i < left_size + right_size; i++)
-		array[i] = tmp[i];
+	i = first;
+	j = mid;
 
 	printf("[Done]: ");
-	print_array(array, left_size + right_size);
-
-	free(tmp);
+	k = first;
+	while (k < size)
+	{
+		if (i < mid && (j >= size || array[i] <= array[j]))
+		{
+			cpy[k] = array[i];
+			i++;
+		}
+		else
+		{
+			cpy[k] = array[j];
+			j++;
+		}
+		if (k < size - 1)
+			printf("%d, ", cpy[k]);
+		else
+			printf("%d\n", cpy[k]);
+		k++;
+	}
 }
 /**
- * merge_sort_helper - recursive helper function for merge sort
- * @array: the array to be sorted
- * @size: size of the array
- * @tmp: temporary array to store the sorted sub-arrays
- **/
-void merge_sort_helper(int *array, size_t size, int *tmp)
+ * mergeSort - array separator
+ * @cpy: copy of array
+ * @first: initial position
+ * @size: size of the original  array
+ * @array: the original array
+ */
+void mergeSort(int *cpy, int first, int size, int *array)
 {
-	size_t mid, i;
-	int *left, *right;
+	int mid;
 
-	if (size < 2)
+	if (size - first < 2)
 		return;
 
-	mid = size / 2;
-	left = array;
-	right = array + mid;
+	mid = (size + first) / 2;
 
-	merge_sort_helper(left, mid, tmp);
-	merge_sort_helper(right, size - mid, tmp);
+	mergeSort(array, first, mid, cpy);
+	mergeSort(array, mid, size, cpy);
 
-	printf("Merging...\n[left]: ");
-	print_array(left, mid);
-	printf("[right]: ");
-	print_array(right, size - mid);
-
-	for (i = 0; i < mid; i++)
-		tmp[i] = left[i];
-
-	for (i = 0; i < size - mid; i++)
-		tmp[mid + i] = right[i];
-
-	merge(array, size, tmp, mid, tmp + mid, size - mid);
+	merge(cpy, size, first, mid, array);
 }
 /**
- * merge_sort - sorts an array of integers in ascending order using
- *              the Merge sort algorithm
- * @array: the array to be sorted
- * @size: size of the array
- **/
+ * copy_array - copy array of int
+ * @arr: array src
+ * @cpy: array dest
+ * @size : array size
+ */
+void copy_array(int *arr, int *cpy, int size)
+{
+	int i;
+
+	for (i = 0; i < (int)size; i++)
+		cpy[i] = arr[i];
+}
+
+/**
+ * merge_sort - create partition and copy
+ * @array: array
+ * @size : array size
+ */
 void merge_sort(int *array, size_t size)
 {
-	int *tmp = malloc(size * sizeof(int));
+	int *cpy;
 
-	if (!tmp)
+	cpy = malloc(sizeof(int) * size - 1);
+
+	if (cpy == NULL)
 		return;
 
+	copy_array(array, cpy, size);
 
-	merge_sort_helper(array, size, tmp);
-
-	free(tmp);
+	mergeSort(cpy, 0, size, array);
+	free(cpy);
 }
