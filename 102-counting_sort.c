@@ -1,52 +1,59 @@
 #include "sort.h"
-#include <stdio.h>
 #include <stdlib.h>
 
 /**
- * counting_sort - sorts an array of integers in ascending order
- * using the Counting sort algorithm
- *
- * @array: pointer to array of integers to be sorted
- * @size: size of the array to be sorted
+ * arr_max - array max
+ * @array: array
+ * @size: size of the array
+ * Return: max
+ */
+int arr_max(int *array, size_t size)
+{
+	int max;
+	size_t i;
+
+	max = array[0];
+	for (i = 1; i < size; i++)
+		if (array[i] > max)
+			max = array[i];
+	return (max);
+}
+
+/**
+ * counting_sort - sorts an array with the Counting sort algorithm
+ * @array: array to sort
+ * @size: size of the array
  */
 void counting_sort(int *array, size_t size)
 {
-    int *counting_array;
-    int max, i;
+	int *arr, *o_arr, max, num;
+	size_t i;
 
-    if (!array || size < 2)
-        return;
+	if (size < 2 || !array)
+		return;
+	max = arr_max(array, size);
 
-    max = array[0];
-    for (i = 1; i < (int)size; i++)
-    {
-        if (array[i] > max)
-            max = array[i];
-    }
+	arr = malloc(sizeof(size_t) * (max + 1));
+	o_arr = malloc(sizeof(int) * size);
 
-    counting_array = malloc(sizeof(int) * (max + 1));
-    if (!counting_array)
-        return;
+	for (i = 0; (int)i <= max; i++)
+		arr[i] = 0;
+	for (i = 0; i < size; i++)
+	{
+		num = array[i];
+		arr[num] += 1;
+	}
+	for (i = 1; (int)i <= max; i++)
+		arr[i] += arr[i - 1];
+	print_array(arr, max + 1);
+	for (i = 0; i < size; i++)
+	{
+		o_arr[arr[array[i]] - 1] = array[i];
+		arr[array[i]]--;
+	}
+	for (i = 0; i < size; i++)
+		array[i] = o_arr[i];
 
-    for (i = 0; i <= max; i++)
-        counting_array[i] = 0;
-
-    for (i = 0; i < (int)size; i++)
-        counting_array[array[i]]++;
-
-    printf("%d", counting_array[0]);
-    for (i = 1; i <= max; i++)
-        printf(", %d", counting_array[i]);
-    printf("\n");
-
-    for (i = 1; i <= max; i++)
-        counting_array[i] += counting_array[i - 1];
-
-    for (i = (int)size - 1; i >= 0; i--)
-    {
-        array[counting_array[array[i]] - 1] = array[i];
-        counting_array[array[i]]--;
-    }
-
-    free(counting_array);
+	free(o_arr);
+	free(arr);
 }
