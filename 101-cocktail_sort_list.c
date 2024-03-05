@@ -1,62 +1,60 @@
 #include "sort.h"
-/**
- * cocktail_sort_list - sorts a doubly linked list of integers in ascending
- *                     order using the Cocktail shaker sort algorithm
- *
- * @list: doubly linked list of integers
- */
 
+/**
+ * swapme - swap the nodes themselves.
+ * @current: pointer.
+ * @current_old: pointer.
+ * @list: doubly linked list
+ */
+void swapme(listint_t *current, listint_t *current_old, listint_t **list)
+{
+	listint_t *temp1 = current->next;
+	listint_t *temp2 = current_old->prev;
+
+	if (temp1 != NULL)
+		temp1->prev = current_old;
+	if (temp2 != NULL)
+		temp2->next = current;
+	current->prev = temp2;
+	current_old->next = temp1;
+	current->next = current_old;
+	current_old->prev = current;
+	if (*list == current_old)
+		*list = current;
+	print_list(*list);
+}
+
+/**
+ * cocktail_sort_list - cocktail_sort_list
+ *
+ * @list: doubly linked list
+ */
 void cocktail_sort_list(listint_t **list)
 {
-	listint_t *temp;
-	int swapped;
+	listint_t *check = *list, *first = NULL, *last = NULL;
 
-	if (list == NULL || *list == NULL || (*list)->next == NULL)
+	if (!list)
 		return;
-
+	if (!(*list))
+		return;
+	if (!(*list)->next)
+		return;
 	do {
-		swapped = 0;
-
-		for (temp = *list; temp->next != NULL; temp = temp->next)
+		while (check->next)
 		{
-			if (temp->n > temp->next->n)
-			{
-				temp->next->prev = temp->prev;
-				if (temp->prev)
-					temp->prev->next = temp->next;
-				else
-					*list = temp->next;
-				temp->prev = temp->next;
-				temp->next = temp->next->next;
-				temp->prev->next = temp;
-				if (temp->next)
-					temp->next->prev = temp;
-				swapped = 1;
-				print_list(*list);
-			}
+			if (check->n > check->next->n)
+				swapme(check->next, check, list);
+			else
+				check = check->next;
 		}
-		if (swapped == 0)
-			break;
-
-		swapped = 0;
-
-		for (temp = temp->prev; temp->prev != NULL; temp = temp->prev)
+		last = check;
+		while (check->prev != first)
 		{
-			if (temp->n < temp->prev->n)
-			{
-				temp->prev->next = temp->next;
-				if (temp->next)
-					temp->next->prev = temp->prev;
-				temp->next = temp->prev;
-				temp->prev = temp->prev->prev;
-				temp->next->prev = temp;
-				if (temp->prev)
-					temp->prev->next = temp;
-				else
-					*list = temp;
-				swapped = 1;
-				print_list(*list);
-			}
+			if (check->n < check->prev->n)
+				swapme(check, check->prev, list);
+			else
+				check = check->prev;
 		}
-		} while (swapped);
+		first = check;
+	} while (first != last);
 }
